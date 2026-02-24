@@ -4,6 +4,9 @@
 // Website to run the game
 // http://localhost:8000/
 
+// Github link
+// https://FakeEstateDeveloper.github.io/learning-phaser-game/
+
 const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -29,31 +32,31 @@ function preload() {
 
     // #region Preload Hero
     // Preload Hero _Idle
-    this.load.spritesheet("hero_idle", "assets/hero/120x80_PNGSheets/_Idle.png", {
+    this.load.spritesheet("hero_idle", "assets/hero/120x80_pngsheets/_Idle.png", {
         frameWidth: 120,
         frameHeight: 80
     });
 
     // Preload Hero _Run
-    this.load.spritesheet("hero_run", "assets/hero/120x80_PNGSheets/_Run.png", {
+    this.load.spritesheet("hero_run", "assets/hero/120x80_pngsheets/_Run.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
     // Preload Hero _Crouch
-    this.load.spritesheet("hero_crouch", "assets/hero/120x80_PNGSheets/_Crouch.png", {
+    this.load.spritesheet("hero_crouch", "assets/hero/120x80_pngsheets/_Crouch.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
     // Preload Hero _CrouchWalk
-    this.load.spritesheet("hero_crouch_walk", "assets/hero/120x80_PNGSheets/_CrouchWalk.png", {
+    this.load.spritesheet("hero_crouch_walk", "assets/hero/120x80_pngsheets/_CrouchWalk.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
     // Preload Hero _Attack
-    this.load.spritesheet("hero_attack", "assets/hero/120x80_PNGSheets/_Attack.png", {
+    this.load.spritesheet("hero_attack", "assets/hero/120x80_pngsheets/_Attack.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
