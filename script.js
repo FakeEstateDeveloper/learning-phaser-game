@@ -32,31 +32,31 @@ function preload() {
 
     // #region Preload Hero
     // Preload Hero _Idle
-    this.load.spritesheet("hero_idle", "assets/hero/120x80_pngsheets/_Idle.png", {
+    this.load.spritesheet("hero_idle", "assets/hero/120x80_pngsheets/_idle.png", {
         frameWidth: 120,
         frameHeight: 80
     });
 
     // Preload Hero _Run
-    this.load.spritesheet("hero_run", "assets/hero/120x80_pngsheets/_Run.png", {
+    this.load.spritesheet("hero_run", "assets/hero/120x80_pngsheets/_run.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
     // Preload Hero _Crouch
-    this.load.spritesheet("hero_crouch", "assets/hero/120x80_pngsheets/_Crouch.png", {
+    this.load.spritesheet("hero_crouch", "assets/hero/120x80_pngsheets/_crouch.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
     // Preload Hero _CrouchWalk
-    this.load.spritesheet("hero_crouch_walk", "assets/hero/120x80_pngsheets/_CrouchWalk.png", {
+    this.load.spritesheet("hero_crouch_walk", "assets/hero/120x80_pngsheets/_crouchwalk.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
     // Preload Hero _Attack
-    this.load.spritesheet("hero_attack", "assets/hero/120x80_pngsheets/_Attack.png", {
+    this.load.spritesheet("hero_attack", "assets/hero/120x80_pngsheets/_attack.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
