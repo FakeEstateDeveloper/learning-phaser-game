@@ -16,19 +16,31 @@ const config = {
         preload: preload,
         create: create,
         update: update,
+    },
+    physics: {
+        default: "arcade",
+        arcade: {
+        gravity: { y: 300 }, 
+        debug: true
+        }
     }
 };
 const game = new Phaser.Game(config);
 
 // Global Variables
 let player;
+let ground;
+let bg;
 let currentState;
-let currentSpeed = 1;
+let currentSpeed = 100;
 
 // Preload
 function preload() {
     // Preload Background
     this.load.image("background", "assets/background.png");
+
+    // Preload Ground
+    this.load.image("ground", "https://i.imgur.com/Zmp7rQG.png");
 
     // #region Preload Hero
     // Preload Hero _Idle
@@ -66,10 +78,7 @@ function preload() {
 // Create
 function create() {
     // Create Background
-    const width = this.sys.game.config.width;
-    const height = this.sys.game.config.height;
-    const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
-    //this.add.image(width / 2, height / 2, "background");
+    bg = this.add.image(0, 0, "background").setOrigin(0, 0);
 
     // #region Create Hero
     // Create Hero Idle
@@ -115,19 +124,27 @@ function create() {
 
     // Create Movement
     this.keys = this.input.keyboard.addKeys({
-        up: Phaser.Input.Keyboard.KeyCodes.SPACE,
-        down: Phaser.Input.Keyboard.KeyCodes.CTRL,
         left: Phaser.Input.Keyboard.KeyCodes.A,
         right: Phaser.Input.Keyboard.KeyCodes.D,
-        crouch: Phaser.Input.Keyboard.KeyCodes.C
+        crouch: Phaser.Input.Keyboard.KeyCodes.C,
+        jump: Phaser.Input.Keyboard.KeyCodes.SPACE,
+        dodge: Phaser.Input.Keyboard.KeyCodes.Q
     });
 
+    // #region Create Setup
     // Spawn point
     const spawnX = bg.width / 2;
-    const spawnY = bg.height - 300;
+    const spawnY = bg.height - 400;
+
+    // Create Ground
+    ground = this.physics.add.staticGroup();
+    ground.create(spawnX, spawnY + 300, "ground").setScale(2).refreshBody();
 
     // Spawn player
-    player = this.add.sprite(spawnX, spawnY, "hero_idle");
+    player = this.physics.add.sprite(spawnX, spawnY, "hero_idle");
+
+    // Add collision between player and ground
+    this.physics.add.collider(player, ground);
 
     // Make camera unable to show black void
     this.cameras.main.setBounds(0, 0, bg.width, bg.height);
@@ -144,6 +161,7 @@ function create() {
 
     // Flags
     this.canAttack = true;
+    // #endregion
 }
 
 // Update
@@ -168,13 +186,15 @@ const states = {
             // Attack
             const mouse = scene.input.activePointer;
             if (mouse.leftButtonDown() && scene.canAttack && mouse.button === 0) {
-                scene.canAttack = false; // "Lock" the attack
+                scene.canAttack = false;    // "Lock" the attack
                 return "attack";
             }
             // Reset Attack
             if (!mouse.leftButtonDown()) {
                 scene.canAttack = true;
             }
+            // Jump
+            if (scene.keys.jump.isDown && player.body.touching.down) return "jump";
             // Crouch
             if (scene.keys.crouch.isDown) return "crouch";
             // Run
@@ -192,13 +212,15 @@ const states = {
             // Attack
             const mouse = scene.input.activePointer;
             if (mouse.leftButtonDown() && scene.canAttack && mouse.button === 0) {
-                scene.canAttack = false; // "Lock" the attack
+                scene.canAttack = false;    // "Lock" the attack
                 return "attack";
             }
             // Reset Attack
             if (!mouse.leftButtonDown()) {
                 scene.canAttack = true;
             }
+            // Jump
+            if (scene.keys.jump.isDown && player.body.touching.down) return "jump";
             // Crouch Walk
             if (scene.keys.crouch.isDown) return "crouch_walk";
             // Idle
@@ -206,15 +228,18 @@ const states = {
 
             // Movement Logic
             if (scene.keys.left.isDown) {
-                player.x -= currentSpeed;
+                player.setVelocityX(-currentSpeed);
                 player.flipX = true;
-            } else if (scene.keys.right.isDown) {
-                player.x += currentSpeed;
+            }
+            else if (scene.keys.right.isDown) {
+                player.setVelocityX(currentSpeed);
                 player.flipX = false;
             }
             return "run";
         },
-        onExit() {}
+        onExit() {
+            player.setVelocityX(0);
+        }
     },
     crouch: {
         onEnter() {
@@ -243,16 +268,19 @@ const states = {
             // Slowed Movement
             const crouchSpeed = currentSpeed / 2;
             if (scene.keys.left.isDown) {
-                player.x -= crouchSpeed;
+                player.setVelocityX(-crouchSpeed);
                 player.flipX = true;
-            } else if (scene.keys.right.isDown) {
-                player.x += crouchSpeed;
+            }
+            else if (scene.keys.right.isDown) {
+                player.setVelocityX(crouchSpeed);
                 player.flipX = false;
             }
             // Crouch Walk
             return "crouch_walk";
         },
-        onExit() {}
+        onExit() {
+            player.setVelocityX(0);
+        }
     },
     attack: {
         isFinished: false,
@@ -275,21 +303,38 @@ const states = {
         onExit() {
             this.isFinished = false;
         }
-    }
+    },
+    jump: {
+        isFinished: false,
+        onEnter() {
+            if (player.body.touching.down) {
+                player.setVelocityY(-150);
+            }
+            player.play("jump", true);
+        },
+        onUpdate() {
+            if (player.body.velocity.y > 0) {
+                // Player is falling
+                return "fall";
+            }
+            return "jump"; // still going up
+        },
+        onExit() {}
+    },
+    fall: {
+    onEnter() {
+        player.play("fall", true);
+    },
+    onUpdate(scene) {
+        if (player.body.touching.down) {
+            // Landed
+            if (scene.keys.left.isDown || scene.keys.right.isDown) return "run";
+            return "idle";
+        }
+        return "fall"; // still falling
+    },
+    onExit() {}
+}
 };
 
-/*
-function create() {
-    const map = this.make.tilemap({ key: "map" });
-    
-    // "tileset_name" must match the name of the tileset inside the Tiled program
-    const tileset = map.addTilesetImage("tileset_name", "tiles");
-
-    // Create layers (Layer name, tileset, x, y)
-    const groundLayer = map.createLayer("Ground", tileset, 0, 0);
-    const platformLayer = map.createLayer("Platforms", tileset, 0, 0);
-
-    // Set camera bounds to the tilemap size
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-}
-*/
+// TODO: ADD JUMP ANIMATION TO PRELOAD AND CREATE, THEN IF ERRORS DEBUG
