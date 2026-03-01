@@ -266,7 +266,7 @@ const states = {
             // Crouch Walk
             if (scene.keys.crouch.isDown) return "crouch_walk";
             // Idle
-            if (!scene.keys.left.isDown && !scene.keys.right.isDown) return "idle";
+            if (!(scene.keys.left.isDown || scene.keys.right.isDown)) return "idle";
 
             // Movement Logic
             if (scene.keys.left.isDown) {
@@ -347,36 +347,55 @@ const states = {
         }
     },
     jump: {
-        isFinished: false,
         onEnter() {
-            if (player.body.touching.down) {
-                player.setVelocityY(-150);
-            }
+            player.setVelocityY(-150);
             player.play("jump", true);
         },
-        onUpdate() {
+        onUpdate(scene) {
+            // Movement Logic
+            if (scene.keys.left.isDown) {
+                player.setVelocityX(-currentSpeed / 1);
+                player.flipX = true;
+            }
+            else if (scene.keys.right.isDown) {
+                player.setVelocityX(currentSpeed / 1);
+                player.flipX = false;
+            }
+            // Fall
             if (player.body.velocity.y > 0) {
-                // Player is falling
                 return "fall";
             }
-            return "jump"; // still going up
+            // Still going up
+            return "jump";
         },
         onExit() {
+            player.setVelocityX(0);
             player.play("jumpfalltransition", true);
         }
     },
     fall: {
-    onEnter() {
-        player.play("fall", true);
-    },
-    onUpdate(scene) {
-        if (player.body.touching.down) {
+        onEnter() {
+            player.play("fall", true);
+        },
+        onUpdate(scene) {
+            // Movement Logic
+            if (scene.keys.left.isDown) {
+                player.setVelocityX(-currentSpeed / 1);
+                player.flipX = true;
+            }
+            else if (scene.keys.right.isDown) {
+                player.setVelocityX(currentSpeed / 1);
+                player.flipX = false;
+            }
             // Landed
-            if (scene.keys.left.isDown || scene.keys.right.isDown) return "run";
-            return "idle";
+            if (player.body.touching.down) {
+                if (scene.keys.left.isDown || scene.keys.right.isDown) return "run";
+                return "idle";
+            }
+            return "fall"; // still falling
+        },
+        onExit() {
+            player.setVelocityX(0);
         }
-        return "fall"; // still falling
-    },
-    onExit() {}
-}
+    }
 };
