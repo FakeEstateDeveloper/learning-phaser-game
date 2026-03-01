@@ -43,33 +43,51 @@ function preload() {
     this.load.image("ground", "https://i.imgur.com/Zmp7rQG.png");
 
     // #region Preload Hero
-    // Preload Hero _Idle
+    // Preload Hero Idle
     this.load.spritesheet("hero_idle", "assets/hero/120x80pngsheets/idle.png", {
         frameWidth: 120,
         frameHeight: 80
     });
 
-    // Preload Hero _Run
+    // Preload Hero Run
     this.load.spritesheet("hero_run", "assets/hero/120x80pngsheets/run.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
-    // Preload Hero _Crouch
+    // Preload Hero Crouch
     this.load.spritesheet("hero_crouch", "assets/hero/120x80pngsheets/crouch.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
-    // Preload Hero _CrouchWalk
+    // Preload Hero CrouchWalk
     this.load.spritesheet("hero_crouch_walk", "assets/hero/120x80pngsheets/crouchwalk.png", {
         frameWidth: 120, 
         frameHeight: 80
     });
 
-    // Preload Hero _Attack
+    // Preload Hero Attack
     this.load.spritesheet("hero_attack", "assets/hero/120x80pngsheets/attack.png", {
         frameWidth: 120, 
+        frameHeight: 80
+    });
+
+    // Preload Hero Jump
+    this.load.spritesheet("hero_jump", "assets/hero/120x80pngsheets/jump.png", {
+        frameWidth: 120,
+        frameHeight: 80
+    });
+
+    // Preload Hero Fall
+    this.load.spritesheet("hero_fall", "assets/hero/120x80pngsheets/fall.png", {
+        frameWidth: 120,
+        frameHeight: 80
+    });
+
+    // Preload Hero JumpFallTransition
+    this.load.spritesheet("hero_jumpfalltransition", "assets/hero/120x80pngsheets/jumpfalltransition.png", {
+        frameWidth: 120,
         frameHeight: 80
     });
     //#endregion
@@ -108,7 +126,7 @@ function create() {
     // Create Hero CrouchWalk
     this.anims.create({
         key: "crouch_walk",
-        frames: this.anims.generateFrameNumbers("hero_crouch_walk", { start: 0, end: 9 }),
+        frames: this.anims.generateFrameNumbers("hero_crouch_walk", { start: 0, end: 7 }),
         frameRate: 9,
         repeat: -1
     });
@@ -116,8 +134,32 @@ function create() {
     // Create Hero Attack
     this.anims.create({
         key: "attack",
-        frames: this.anims.generateFrameNumbers("hero_attack", { start: 0, end: 9 }),
+        frames: this.anims.generateFrameNumbers("hero_attack", { start: 0, end: 3 }),
         frameRate: 20,
+        repeat: 0
+    });
+    
+    // Create Hero Jump
+    this.anims.create({
+        key: "jump",
+        frames: this.anims.generateFrameNumbers("hero_jump", { start: 0, end: 2}),
+        frameRate: 20,
+        repeat: 0
+    });
+
+    // Create Hero Fall
+    this.anims.create({
+        key: "fall",
+        frames: this.anims.generateFrameNumbers("hero_fall", { start: 0, end: 2}),
+        frameRate: 20,
+        repeat: 0
+    });
+
+    // Create Hero jumpfalltransition
+    this.anims.create({
+        key: "jumpfalltransition",
+        frames: this.anims.generateFrameNumbers("hero_jumpfalltransition", { start: 0, end: 1}),
+        frameRate: 30,
         repeat: 0
     });
     // #endregion
@@ -128,7 +170,7 @@ function create() {
         right: Phaser.Input.Keyboard.KeyCodes.D,
         crouch: Phaser.Input.Keyboard.KeyCodes.C,
         jump: Phaser.Input.Keyboard.KeyCodes.SPACE,
-        dodge: Phaser.Input.Keyboard.KeyCodes.Q
+        dodgeroll: Phaser.Input.Keyboard.KeyCodes.Q
     });
 
     // #region Create Setup
@@ -319,7 +361,9 @@ const states = {
             }
             return "jump"; // still going up
         },
-        onExit() {}
+        onExit() {
+            player.play("jumpfalltransition", true);
+        }
     },
     fall: {
     onEnter() {
@@ -336,5 +380,3 @@ const states = {
     onExit() {}
 }
 };
-
-// TODO: ADD JUMP ANIMATION TO PRELOAD AND CREATE, THEN IF ERRORS DEBUG
