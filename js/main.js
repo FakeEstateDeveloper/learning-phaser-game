@@ -14,6 +14,9 @@ export function main(Phaser, createStates) {
     // Map
     let ground, bg;
 
+    // Collectibles
+    let coin;
+
     // State
     let states;
     let currentState;
@@ -35,7 +38,6 @@ export function main(Phaser, createStates) {
             arcade: { gravity: { y: 575 }, debug: true }
         }
     };
-
     const game = new Phaser.Game(config);
 
     // Preload
@@ -45,6 +47,9 @@ export function main(Phaser, createStates) {
 
         // Preload Ground
         this.load.image("ground", "https://i.imgur.com/Zmp7rQG.png");
+
+        // Preload Star
+        this.load.image("coin", "assets/coin.png");
 
         // #region Preload Hero
         // Hero spritesheets
@@ -61,9 +66,6 @@ export function main(Phaser, createStates) {
 
     // Create
     function create() {
-        // Create Background
-        bg = this.add.image(0, 0, "background").setOrigin(0, 0);
-
         // #region Create Hero
         // Idle
         this.anims.create({
@@ -131,6 +133,9 @@ export function main(Phaser, createStates) {
         });
 
         // #region Create Setup
+        // Create Background
+        bg = this.add.image(0, 0, "background").setOrigin(0, 0);
+
         // Spawn point
         const spawnX = bg.width / 2;
         const spawnY = bg.height - 400;
@@ -138,36 +143,36 @@ export function main(Phaser, createStates) {
         // Create Ground
         ground = this.physics.add.staticGroup();
         ground.create(spawnX, spawnY + 300, "ground").setScale(2).refreshBody();
-
-        // Create more platforms
         ground.create(spawnX + 10, spawnY + 210, "ground").setScale(0.1).refreshBody();
         ground.create(spawnX + 100, spawnY + 180, "ground").setScale(0.1).refreshBody();
 
-        // Spawn player
-        player = this.physics.add.sprite(spawnX, spawnY);
-        player.body.setSize(25.5, 40);
-        player.body.setOffset(47.5, 40);
+        // Player
+        player = this.physics.add.sprite(spawnX, spawnY);           // Spawn player
+        player.body.setSize(25.5, 40);                              // Set size of player's hitbox
+        player.body.setOffset(47.5, 40);                            // Set offset of player's hitbox
+        this.physics.add.collider(player, ground);                  // Add collision between player and ground
 
-        // Add collision between player and ground
-        this.physics.add.collider(player, ground);
-
-        // Make camera unable to show black void
-        this.cameras.main.setBounds(0, 0, bg.width, bg.height);
-
-        // Make camera follow the player
-        this.cameras.main.startFollow(player, true, 0.1, 0.1);
-
-        // Disables right-click mouse menu
-        this.input.mouse.disableContextMenu();
-        
-        // Flags
+        // Player Flags
         this.canAttack = true;
+
+        // Create Collectibles (Can also set obstacles to .setImmovable(true);)
+        const myCoin = this.physics.add.sprite(spawnX + 180, spawnY + 150, "coin").setScale(0.05);
+        myCoin.body.allowGravity = false;
+        this.physics.add.collider(myCoin, ground);                  // Add collision with ground
+        this.physics.add.overlap(player, myCoin, () => {
+            myCoin.disableBody(true, true);
+        });
+
+        // Camera
+        this.cameras.main.setBounds(0, 0, bg.width, bg.height);     // Make camera unable to show black void
+        this.cameras.main.startFollow(player, true, 0.1, 0.1);      // Make camera follow the player
+        this.input.mouse.disableContextMenu();                      // Disables right-click mouse menu
+        // #endregion
 
         // Enter State
         states = createStates(player, currentSpeed);
         currentState = "idle";
         states[currentState].onEnter();
-        // #endregion
     }
 
     // Update
