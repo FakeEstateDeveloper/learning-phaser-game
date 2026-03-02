@@ -32,6 +32,8 @@ export function createStates(player, currentSpeed) {
                 player.play("run", true);
             },
             onUpdate(scene) {
+                // Must-have Condition
+                if (!player.body.touching.down) return "fall";
                 // Attack
                 const mouse = scene.input.activePointer;
                 if (mouse.leftButtonDown() && scene.canAttack && mouse.button === 0) {
@@ -43,7 +45,7 @@ export function createStates(player, currentSpeed) {
                     scene.canAttack = true;
                 }
                 // Jump
-                if (scene.keys.jump.isDown && player.body.touching.down) return "jump";
+                if (scene.keys.jump.isDown) return "jump";
                 // Fall
                 if (player.body.velocity.y > 0) return "fall";
                 // Crouch Walk
@@ -73,6 +75,8 @@ export function createStates(player, currentSpeed) {
             onUpdate(scene) {
                 // Idle
                 if (!scene.keys.crouch.isDown) return "idle";
+                // Fall
+                if (!player.body.touching.down) return "fall";
                 // Crouch Walk
                 if (scene.keys.left.isDown || scene.keys.right.isDown) return "crouch_walk";
                 // Crouch
@@ -85,6 +89,8 @@ export function createStates(player, currentSpeed) {
                 player.play("crouch_walk", true);
             },
             onUpdate(scene) {
+                // Fall
+                if (!player.body.touching.down) return "fall";
                 // Run
                 if (!scene.keys.crouch.isDown) return "run";
                 // Crouch
@@ -134,7 +140,7 @@ export function createStates(player, currentSpeed) {
         },
         jump: {
             onEnter() {
-                player.setVelocityY(-150);
+                player.setVelocityY(-200);
                 player.play("jump", true);
             },
             onUpdate(scene) {
