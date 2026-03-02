@@ -189,6 +189,13 @@ export function createStates(player, currentSpeed) {
             onExit() {
                 player.setVelocityX(0);
             }
+        },
+        dodgeroll: {
+            onEnter() {
+                player.play("dodgeroll", true);
+            },
+            onUpdate() {},
+            onExit() {}
         }
     };
 }

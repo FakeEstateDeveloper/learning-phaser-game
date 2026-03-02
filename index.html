@@ -3,12 +3,12 @@
 <head>
     <title>Phaser Game</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.png">
+    <link rel="stylesheet" href="./style.css">
     <!-- Use the ESM build for Phaser -->
     <script type="module">
         import * as Phaser from 'https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.esm.js';
-        import { main } from './js/main.js';
         import { createStates } from './js/statemachine.js';
-
+        import { main } from './js/main.js';
         main(Phaser, createStates);
     </script>
 </head>

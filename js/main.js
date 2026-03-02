@@ -8,22 +8,31 @@
 // https://FakeEstateDeveloper.github.io/learning-phaser-game/
 
 export function main(Phaser, createStates) {
-    let player, ground, bg, states;
+    // Player
+    let player;
+
+    // Map
+    let ground, bg;
+
+    // State
+    let states;
     let currentState;
     let currentSpeed = 1;
     
     const config = {
         type: Phaser.AUTO,
-        width: window.innerWidth,
-        height: window.innerHeight,
+        scale: {
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+            width: 800,
+            height: 600,
+            zoom: 2
+        },
         backgroundColor: "#000000",
         scene: { preload, create, update },
         physics: {
             default: "arcade",
-            arcade: {
-                gravity: { y: 575 },
-                debug: true
-            }
+            arcade: { gravity: { y: 575 }, debug: true }
         }
     };
 
@@ -135,7 +144,7 @@ export function main(Phaser, createStates) {
         ground.create(spawnX + 100, spawnY + 180, "ground").setScale(0.1).refreshBody();
 
         // Spawn player
-        player = this.physics.add.sprite(spawnX, spawnY, "hero_idle");
+        player = this.physics.add.sprite(spawnX, spawnY);
         player.body.setSize(25.5, 40);
         player.body.setOffset(47.5, 40);
 
