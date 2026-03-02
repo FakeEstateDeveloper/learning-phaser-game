@@ -6,6 +6,8 @@ export function createStates(player, currentSpeed) {
                 player.play("idle", true);
             },
             onUpdate(scene) {
+                // Fall
+                if (!player.body.touching.down) return "fall";
                 // Attack
                 const mouse = scene.input.activePointer;
                 if (mouse.leftButtonDown() && scene.canAttack && mouse.button === 0) {
@@ -16,8 +18,10 @@ export function createStates(player, currentSpeed) {
                 if (!mouse.leftButtonDown()) {
                     scene.canAttack = true;
                 }
+                // DodgeRoll
+                if (scene.keys.dodgeroll.isDown && scene.canDodge) return "dodgeroll";
                 // Jump
-                if (scene.keys.jump.isDown && player.body.touching.down) return "jump";
+                if (scene.keys.jump.isDown) return "jump";
                 // Crouch
                 if (scene.keys.crouch.isDown) return "crouch";
                 // Run
@@ -32,7 +36,7 @@ export function createStates(player, currentSpeed) {
                 player.play("run", true);
             },
             onUpdate(scene) {
-                // Must-have Condition
+                // Fall
                 if (!player.body.touching.down) return "fall";
                 // Attack
                 const mouse = scene.input.activePointer;
@@ -44,6 +48,8 @@ export function createStates(player, currentSpeed) {
                 if (!mouse.leftButtonDown()) {
                     scene.canAttack = true;
                 }
+                // DodgeRoll
+                if (scene.keys.dodgeroll.isDown && scene.canDodge) return "dodgeroll";
                 // Jump
                 if (scene.keys.jump.isDown) return "jump";
                 // Fall
@@ -73,10 +79,10 @@ export function createStates(player, currentSpeed) {
                 player.play("crouch", true);
             },
             onUpdate(scene) {
+                // Must-have Condition
+                if (!player.body.touching.down) return "fall";
                 // Idle
                 if (!scene.keys.crouch.isDown) return "idle";
-                // Fall
-                if (!player.body.touching.down) return "fall";
                 // Crouch Walk
                 if (scene.keys.left.isDown || scene.keys.right.isDown) return "crouch_walk";
                 // Crouch
@@ -191,11 +197,43 @@ export function createStates(player, currentSpeed) {
             }
         },
         dodgeroll: {
-            onEnter() {
+            isFinished: false,
+            onEnter(scene) {
+                if (!scene.canDodge) return;
+
+                scene.canDodge = false;
+                scene.time.delayedCall(950, () => { scene.canDodge = true; });
+
+                this.isFinished = false;
+                
+                if (player.flipX) { this.direction = -1; }
+                else if (!player.flipX) { this.direction = 1; }
+
+                // Determine direction at the start
+                if (scene.keys.left.isDown) this.direction = -1;
+                else if (scene.keys.right.isDown) this.direction = 1;
+
+                // Play the animation
                 player.play("dodgeroll", true);
+
+                // Once the animation finishes, set our flag to true
+                player.once("animationcomplete-dodgeroll", () => { this.isFinished = true; });
             },
-            onUpdate() {},
-            onExit() {}
+            onUpdate(scene) {
+                const speed = scene.currentSpeed || 200;
+                player.setVelocityX(this.direction * speed * 1.2);                      // Move in the initial direction, even if keys are released
+                player.flipX = this.direction === -1;
+                
+                // Conditions
+                if (!player.body.touching.down && this.isFinished) return "fall";       // Fall overrides everything
+                if (!this.isFinished) return "dodgeroll";                               // Stay in dodgeroll until the animation is done
+                if (scene.keys.left.isDown || scene.keys.right.isDown) return "run";    // Once finished, decide next state
+                return "idle";
+            },
+            onExit() {
+                this.isFinished = false;
+                player.setVelocityX(0);
+            }
         }
     };
 }

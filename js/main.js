@@ -10,17 +10,14 @@
 export function main(Phaser, createStates) {
     // Player
     let player;
+    let currentSpeed = 1;
 
     // Map
     let ground, bg;
 
-    // Collectibles
-    let coin;
-
     // State
     let states;
     let currentState;
-    let currentSpeed = 1;
     
     const config = {
         type: Phaser.AUTO,
@@ -38,7 +35,7 @@ export function main(Phaser, createStates) {
             arcade: { gravity: { y: 575 }, debug: true }
         }
     };
-    const game = new Phaser.Game(config);
+    new Phaser.Game(config);
 
     // Preload
     function preload() {
@@ -51,17 +48,16 @@ export function main(Phaser, createStates) {
         // Preload Star
         this.load.image("coin", "assets/coin.png");
 
-        // #region Preload Hero
         // Hero spritesheets
-            this.load.spritesheet("hero_idle",                  "assets/hero/120x80pngsheets/idle.png",                         { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_run",                   "assets/hero/120x80pngsheets/run.png",                          { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_crouch",                "assets/hero/120x80pngsheets/crouch.png",                       { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_crouch_walk",           "assets/hero/120x80pngsheets/crouchwalk.png",                   { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_attack",                "assets/hero/120x80pngsheets/attack.png",                       { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_jump",                  "assets/hero/120x80pngsheets/jump.png",                         { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_fall",                  "assets/hero/120x80pngsheets/fall.png",                         { frameWidth: 120, frameHeight: 80 });
-            this.load.spritesheet("hero_jumpfalltransition",    "assets/hero/120x80pngsheets/jumpfalltransition.png",           { frameWidth: 120, frameHeight: 80 });
-        //#endregion
+        this.load.spritesheet("hero_idle",                  "assets/hero/120x80pngsheets/idle.png",                         { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_run",                   "assets/hero/120x80pngsheets/run.png",                          { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_crouch",                "assets/hero/120x80pngsheets/crouch.png",                       { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_crouch_walk",           "assets/hero/120x80pngsheets/crouchwalk.png",                   { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_attack",                "assets/hero/120x80pngsheets/attack.png",                       { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_jump",                  "assets/hero/120x80pngsheets/jump.png",                         { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_fall",                  "assets/hero/120x80pngsheets/fall.png",                         { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_jumpfalltransition",    "assets/hero/120x80pngsheets/jumpfalltransition.png",           { frameWidth: 120, frameHeight: 80 });
+        this.load.spritesheet("hero_dodgeroll",             "assets/hero/120x80pngsheets/dodgeroll.png",                    { frameWidth: 120, frameHeight: 80 });
     }
 
     // Create
@@ -121,6 +117,13 @@ export function main(Phaser, createStates) {
             frameRate: 30,
             repeat: 0
         });
+        // Dodgeroll
+        this.anims.create({
+            key: "dodgeroll",
+            frames: this.anims.generateFrameNumbers("hero_dodgeroll", { start: 0, end: 11}),
+            frameRate: 25,
+            repeat: 0
+        });
         // #endregion
 
         // Create Movement
@@ -154,12 +157,13 @@ export function main(Phaser, createStates) {
 
         // Player Flags
         this.canAttack = true;
+        this.canDodge = true;
 
         // Create Collectibles (Can also set obstacles to .setImmovable(true);)
         const myCoin = this.physics.add.sprite(spawnX + 180, spawnY + 150, "coin").setScale(0.05);
         myCoin.body.allowGravity = false;
         this.physics.add.collider(myCoin, ground);                  // Add collision with ground
-        this.physics.add.overlap(player, myCoin, () => {
+        this.physics.add.overlap(player, myCoin, () => {            // If player touches myCoin, delete the coin
             myCoin.disableBody(true, true);
         });
 
