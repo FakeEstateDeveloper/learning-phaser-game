@@ -19,6 +19,13 @@ export function main(Phaser, createStates) {
     let states;
     let currentState;
     
+    // Mouse
+    let mouseVisible = false;
+
+    // Score
+    let score = 0
+    let scoreText;
+    
     const config = {
         type: Phaser.AUTO,
         scale: {
@@ -126,8 +133,19 @@ export function main(Phaser, createStates) {
         });
         // #endregion
 
+        // Disable all windows keys
+        window.addEventListener('keydown', function(e) {
+            if (e.key === "Tab") {
+                e.preventDefault();
+            }
+        });
+
         // Create Movement
         this.keys = this.input.keyboard.addKeys({
+            // Menu
+            tab: Phaser.Input.Keyboard.KeyCodes.TAB,
+
+            // Gameplay
             left: Phaser.Input.Keyboard.KeyCodes.A,
             right: Phaser.Input.Keyboard.KeyCodes.D,
             crouch: Phaser.Input.Keyboard.KeyCodes.C,
@@ -138,6 +156,13 @@ export function main(Phaser, createStates) {
         // #region Create Setup
         // Create Background
         bg = this.add.image(0, 0, "background").setOrigin(0, 0);
+
+        // Score Text
+        scoreText = this.add.text(16, 16, "Score: 0", {
+            fontSize: "32px",
+            fill: "#000"
+        });
+        scoreText.setScrollFactor(0);
 
         // Spawn point
         const spawnX = bg.width / 2;
@@ -165,6 +190,8 @@ export function main(Phaser, createStates) {
         this.physics.add.collider(myCoin, ground);                  // Add collision with ground
         this.physics.add.overlap(player, myCoin, () => {            // If player touches myCoin, delete the coin
             myCoin.disableBody(true, true);
+            score += 10;
+            scoreText.setText("Score: " + score);
         });
 
         // Camera
@@ -188,6 +215,12 @@ export function main(Phaser, createStates) {
             states[nextState].onEnter(this);
             currentState = nextState;
             console.log("Switched to state:", currentState);
+        }
+
+        // Hide the cursor over the game canvas
+        if (Phaser.Input.Keyboard.JustDown(this.keys.tab)) {
+            mouseVisible = !mouseVisible;
+            this.input.setDefaultCursor(mouseVisible ? 'default' : 'none');
         }
     }
 
