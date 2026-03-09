@@ -7,6 +7,10 @@
 // Github link
 // https://FakeEstateDeveloper.github.io/learning-phaser-game/
 
+// Future add: Post-processing effects like Bloom, Glows, Blur, Vignette
+
+// Adding https://maaot.itch.io/mossy-cavern (Too fucking big for my canvas...)
+
 export function main(Phaser, createStates) {
     // Player
     let player;
@@ -54,6 +58,10 @@ export function main(Phaser, createStates) {
 
         // Preload Star
         this.load.image("coin", "assets/coin.png");
+
+        // Mossy Tileset
+        this.load.tilemapTiledJSON("mossy_autotiling", "assets/mossy/mossy_autotiling.tmj")
+        this.load.image("mossyTiles", "assets/mossy/mossy_tileset.png");
 
         // Hero spritesheets
         this.load.spritesheet("hero_idle",                  "assets/hero/120x80pngsheets/idle.png",                         { frameWidth: 120, frameHeight: 80 });
@@ -157,13 +165,6 @@ export function main(Phaser, createStates) {
         // Create Background
         bg = this.add.image(0, 0, "background").setOrigin(0, 0);
 
-        // Score Text
-        scoreText = this.add.text(16, 16, "Score: 0", {
-            fontSize: "32px",
-            fill: "#000"
-        });
-        scoreText.setScrollFactor(0);
-
         // Spawn point
         const spawnX = bg.width / 2;
         const spawnY = bg.height - 400;
@@ -174,11 +175,24 @@ export function main(Phaser, createStates) {
         ground.create(spawnX + 10, spawnY + 210, "ground").setScale(0.1).refreshBody();
         ground.create(spawnX + 100, spawnY + 180, "ground").setScale(0.1).refreshBody();
 
+        // Create Mossy Map (Doesn't fucking work)
+        const map = this.make.tilemap({ key: "mossy_autotiling"});
+        const tileset = map.addTilesetImage("mossy_tiles", "mossyTiles");
+        const groundLayer = map.createLayer("Tile Layer 1", tileset, 0, 0);
+        groundLayer.setCollisionByProperty({ collides: true });
+
+        // Score Text
+        scoreText = this.add.text(16, 16, "Score: 0", {
+            fontSize: "32px",
+            fill: "#000"
+        });
+        scoreText.setScrollFactor(0);
+
         // Player
         player = this.physics.add.sprite(spawnX, spawnY);           // Spawn player
         player.body.setSize(25.5, 40);                              // Set size of player's hitbox
         player.body.setOffset(47.5, 40);                            // Set offset of player's hitbox
-        this.physics.add.collider(player, ground);                  // Add collision between player and ground
+        this.physics.add.collider(player, ground);             // Add collision between player and map
 
         // Player Flags
         this.canAttack = true;
@@ -187,7 +201,7 @@ export function main(Phaser, createStates) {
         // Create Collectibles (Can also set obstacles to .setImmovable(true);)
         const myCoin = this.physics.add.sprite(spawnX + 180, spawnY + 150, "coin").setScale(0.05);
         myCoin.body.allowGravity = false;
-        this.physics.add.collider(myCoin, ground);                  // Add collision with ground
+        this.physics.add.collider(myCoin, ground);             // Add collision with ground
         this.physics.add.overlap(player, myCoin, () => {            // If player touches myCoin, delete the coin
             myCoin.disableBody(true, true);
             score += 10;
@@ -223,5 +237,4 @@ export function main(Phaser, createStates) {
             this.input.setDefaultCursor(mouseVisible ? 'default' : 'none');
         }
     }
-
 }
